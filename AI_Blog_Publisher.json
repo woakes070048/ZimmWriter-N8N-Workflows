@@ -1,0 +1,352 @@
+{
+  "name": "Your Website - AI Blog Publisher",
+  "nodes": [
+    {
+      "parameters": {
+        "title": "={{ $json[\"title\"] }}",
+        "additionalFields": {
+          "content": "={{ $json[\"content\"] }}"
+        }
+      },
+      "name": "WordPress",
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        300
+      ],
+      "id": "815fa02f-9cc5-4fd7-8908-9d1514faa679",
+      "credentials": {
+        "wordpressApi": {
+          "id": "41",
+          "name": "Your Website WP"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "e90de98b-e12a-4779-9da7-333218e26a86",
+      "name": "When clicking \"Execute Workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "operation": "list",
+        "path": "/URLPath/Website/Blog_Posts"
+      },
+      "id": "51ebf6a9-5c3b-40bb-b602-79f267b3d818",
+      "name": "Nextcloud",
+      "type": "n8n-nodes-base.nextCloud",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "credentials": {
+        "nextCloudApi": {
+          "id": "8",
+          "name": "NextCloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "path": "={{ $json[\"path\"] }}",
+        "binaryPropertyName": "=data"
+      },
+      "id": "d23db8e4-d7a2-48a9-b67d-22af984cb0fd",
+      "name": "Nextcloud1",
+      "type": "n8n-nodes-base.nextCloud",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "nextCloudApi": {
+          "id": "8",
+          "name": "NextCloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "setAllData": false,
+        "destinationKey": "filecontents",
+        "options": {
+          "jsonParse": false
+        }
+      },
+      "id": "d089dc5a-3452-4490-b888-1ec5a12f342c",
+      "name": "Move Binary Data",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the file contents from the input data\nconst fileContents = items[0].json.filecontents;\n\n// Split the file contents into an array of lines\nconst lines = fileContents.split('\\n');\n\n// Remove the first 4 lines\nlines.splice(0, 4);\n\n// Join the remaining lines back into a single string\nconst newFileContents = lines.join('\\n');\n\n// Set the new file contents as the output\nreturn [{ json: { filecontents: newFileContents } }];\n"
+      },
+      "id": "a7e68d66-7012-41a3-9cad-ce0b90cee1fa",
+      "name": "Code1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        860,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the file content from the previous node\nconst fileContent = items[0].json.filecontents;\n\n// Split the file content into an array of lines\nconst lines = fileContent.split('\\n');\n\n// Get the first line as the title\nconst title = lines[0].trim();\n\n// Get the rest of the lines as the body and join them together\nconst body = lines.slice(1).join('\\n').trim();\n\n// Set the output\nreturn [{json: {title, body}}];\n"
+      },
+      "id": "9a6cca92-11f4-4ee7-a806-2b27fda6340f",
+      "name": "Code2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json[\"body\"] }}",
+        "destinationKey": "content",
+        "options": {}
+      },
+      "id": "9f81695a-76ef-4c5b-91cd-4d0dfba2d0fc",
+      "name": "Markdown",
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "path": "={{ $node[\"Nextcloud1\"].json[\"path\"] }}",
+        "toPath": "=/URLPath/Website/Published/{{ $json[\"title\"][\"rendered\"] }} Published.txt"
+      },
+      "id": "00d548b4-15b2-4ea6-bd7a-c02ab3951383",
+      "name": "Nextcloud3",
+      "type": "n8n-nodes-base.nextCloud",
+      "typeVersion": 1,
+      "position": [
+        1580,
+        300
+      ],
+      "credentials": {
+        "nextCloudApi": {
+          "id": "8",
+          "name": "NextCloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "6bf1d0d4-a10d-4d85-9529-d7bda9277c76",
+      "name": "SplitInBatches1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        260,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": true,
+              "value2": "={{$node[\"SplitInBatches1\"].context[\"noItemsLeft\"]}}"
+            }
+          ]
+        }
+      },
+      "id": "fdc85dec-7b92-42c0-bd30-81fa8d73a93a",
+      "name": "IF1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "cb96c90d-ebb7-4756-a12b-fcec93273b6b",
+      "name": "No Operation, do nothing1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        160
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking \"Execute Workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Nextcloud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nextcloud": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nextcloud1": {
+      "main": [
+        [
+          {
+            "node": "Move Binary Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move Binary Data": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "WordPress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WordPress": {
+      "main": [
+        [
+          {
+            "node": "Nextcloud3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nextcloud3": {
+      "main": [
+        [
+          {
+            "node": "IF1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SplitInBatches1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitInBatches1": {
+      "main": [
+        [
+          {
+            "node": "Nextcloud1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "2e29f74d-3f83-4730-bfbe-b7b3baec9cdd",
+  "id": "75",
+  "meta": {
+    "instanceId": "7bfea076db05271bda3779ae68f8c25c7bf6ab9038c7c740cee303eb9b445dd4"
+  },
+  "tags": [
+    {
+      "createdAt": "2023-03-03T12:34:50.900Z",
+      "updatedAt": "2023-03-03T12:34:50.900Z",
+      "id": "7",
+      "name": "Your Websites"
+    }
+  ]
+}
