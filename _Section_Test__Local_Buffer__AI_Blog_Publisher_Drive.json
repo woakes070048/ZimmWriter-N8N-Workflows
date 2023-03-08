@@ -1,0 +1,496 @@
+{
+  "name": "[Section Test] Local Buffer- AI Blog Publisher Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "list",
+        "useQueryString": true,
+        "queryString": "\"1T4D655E6yoI2XpFsg40Q2xGbNgWD-tnK\" in parents",
+        "limit": 1000,
+        "options": {}
+      },
+      "id": "2669d68d-92ef-4bee-92dc-77b0272aa8b6",
+      "name": "Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "42",
+          "name": "Woakes070048 Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "Topic Title",
+              "value": "={{ $json[\"title\"] }}"
+            },
+            {
+              "name": "META TITLE",
+              "value": "={{ $json[\"sections\"][0][\"body\"] }}"
+            },
+            {
+              "name": "META DESCRIPTION",
+              "value": "={{ $json[\"sections\"][1][\"body\"] }}"
+            },
+            {
+              "name": "FIZZY TLDR",
+              "value": "={{ $json[\"sections\"][2][\"body\"] }}"
+            },
+            {
+              "name": "SPICY LIST OF FEATURES",
+              "value": "={{ $json[\"sections\"][3][\"body\"] }}"
+            },
+            {
+              "name": "JUICY TAGLINE AND CALL TO ACTION",
+              "value": "={{ $json[\"sections\"][4][\"body\"] }}"
+            },
+            {
+              "name": "TASTY HOW CAN WE HELP",
+              "value": "={{ $json[\"sections\"][5][\"body\"] }}"
+            },
+            {
+              "name": "SNACK ON WHY US",
+              "value": "={{ $json[\"sections\"][6][\"body\"] }}"
+            },
+            {
+              "name": "LOAD UP ON SOME FAQS",
+              "value": "={{ $json[\"sections\"][7][\"body\"] }}"
+            },
+            {
+              "name": "FOUR DISH MAIN COURSE"
+            },
+            {
+              "name": "DELICIOUS DISH 1",
+              "value": "={{ $json[\"sections\"][9][\"body\"] }}"
+            },
+            {
+              "name": "DELICIOUS DISH 2",
+              "value": "={{ $json[\"sections\"][10][\"body\"] }}"
+            },
+            {
+              "name": "DELICIOUS DISH 4",
+              "value": "={{ $json[\"sections\"][11][\"body\"] }}"
+            },
+            {
+              "name": "DELICIOUS DISH 3",
+              "value": "={{ $json[\"sections\"][12][\"body\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d28787f7-237d-4e3d-bd96-6e403d384e41",
+      "name": "Set",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "application": {
+          "__rl": true,
+          "value": "https://airtable.com/appSnEm8veakJahJF/tbltowPcMQEjLgYPi",
+          "mode": "url",
+          "__regex": "https://airtable.com/([a-zA-Z0-9]{2,})"
+        },
+        "table": {
+          "__rl": true,
+          "value": "https://airtable.com/appSnEm8veakJahJF/tbltowPcMQEjLgYPi/viwS5rhYHM2R5hCDc",
+          "mode": "url",
+          "__regex": "https://airtable.com/[a-zA-Z0-9]{2,}/([a-zA-Z0-9]{2,})"
+        },
+        "addAllFields": false,
+        "fields": [
+          "Topic Title",
+          "META TITLE",
+          "META DESCRIPTION",
+          "FIZZY TLDR",
+          "SPICY LIST OF FEATURES",
+          "JUICY TAGLINE AND CALL TO ACTION",
+          "TASTY HOW CAN WE HELP",
+          "SNACK ON WHY US",
+          "LOAD UP ON SOME FAQS",
+          "FOUR DISH MAIN COURSE",
+          "DELICIOUS DISH 1",
+          "DELICIOUS DISH 2",
+          "DELICIOUS DISH 3",
+          "DELICIOUS DISH 4"
+        ],
+        "options": {}
+      },
+      "id": "203d484e-e9d8-4875-abf4-7657e2662d3a",
+      "name": "Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        1860,
+        300
+      ],
+      "credentials": {
+        "airtableApi": {
+          "id": "35",
+          "name": "Woakes Airtable"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "ba7c0f22-a315-4668-8798-33233d908c2b",
+      "name": "No Operation, do nothing1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": true,
+              "value2": "={{$node[\"SplitInBatches1\"].context[\"noItemsLeft\"]}}"
+            }
+          ]
+        }
+      },
+      "id": "220ddb1b-328a-4079-9bf7-33defddbe680",
+      "name": "IF1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "d2657d45-9aeb-4adf-b4c2-1a6794e2c4bd",
+      "name": "SplitInBatches1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json[\"body\"] }}",
+        "destinationKey": "content",
+        "options": {}
+      },
+      "id": "05d6f64e-6158-44b5-92e0-92619f0941ec",
+      "name": "Markdown",
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// get the markdown content from the previous step\nconst markdown = items[0].json.filecontents;\n\n// split the markdown content into sections based on the headers\nconst sections = markdown.split(/\\n#{1,6}\\s/g);\n\n// extract the title and body from the first section\nconst [title, ...bodyLines] = sections[0].split(/\\n/);\nconst body = bodyLines.join('\\n').trim();\n\n// create an array to hold the section objects\nconst sectionObjects = [];\n\n// loop through the remaining sections and create section objects\nfor (let i = 1; i < sections.length; i++) {\n  const [sectionTitle, ...sectionBodyLines] = sections[i].split(/\\n/);\n  const sectionBody = sectionBodyLines.join('\\n').trim();\n  sectionObjects.push({ title: sectionTitle, body: sectionBody });\n}\n\n// return the title, body, and section objects as the output\nreturn [{ json: { title, body, sections: sectionObjects } }];\n"
+      },
+      "id": "19fa9497-265b-49f0-8d8e-9e33c0c1241b",
+      "name": "Code2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the file contents from the input data\nconst fileContents = items[0].json.filecontents;\n\n// Split the file contents into an array of lines\nconst lines = fileContents.split('\\n');\n\n// Remove the first 2 lines\nlines.splice(0, 2);\n\n// Join the remaining lines back into a single string\nconst newFileContents = lines.join('\\n');\n\n// Set the new file contents as the output\nreturn [{ json: { filecontents: newFileContents } }];\n"
+      },
+      "id": "00275785-a2e4-4629-b5ac-6a8da6281c93",
+      "name": "Code1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        860,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "setAllData": false,
+        "destinationKey": "filecontents",
+        "options": {
+          "jsonParse": false
+        }
+      },
+      "id": "f8f72bc1-0732-4cc8-9181-bdc2f185f455",
+      "name": "Move Binary Data",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "0d493214-dcd9-4636-b71d-b01d6d41cc6d",
+      "name": "When clicking \"Execute Workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $node[\"Google Drive\"].json[\"id\"] }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "5eb9f2d3-09eb-49d8-a1ff-4b75bc8d0fb1",
+      "name": "Google Drive2",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "42",
+          "name": "Woakes070048 Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "path": "={{ $node[\"Nextcloud1\"].json[\"path\"] }}",
+        "toPath": "=/Mainly_Tiny_Home/Website/Published/{{ $json[\"title\"][\"rendered\"] }} Published.txt"
+      },
+      "id": "975f0431-b3fa-4435-ae66-9a83a970557e",
+      "name": "Nextcloud",
+      "type": "n8n-nodes-base.nextCloud",
+      "typeVersion": 1,
+      "position": [
+        2440,
+        -320
+      ],
+      "credentials": {
+        "nextCloudApi": {
+          "id": "8",
+          "name": "NextCloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $node[\"Google Drive2\"].json[\"id\"] }}",
+          "mode": "id"
+        },
+        "updateFields": {
+          "fileName": "=published-{{ $node[\"Google Drive2\"].json[\"name\"] }}",
+          "parentId": "1kvPq8AsywMP7BP99a9kQ8aXHCC9h2tMI"
+        },
+        "options": {}
+      },
+      "id": "5efc910f-f0e5-4144-b7c3-c9a673ff0d84",
+      "name": "Google Drive1",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        300
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "42",
+          "name": "Woakes070048 Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SplitInBatches1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "Google Drive1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move Binary Data": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitInBatches1": {
+      "main": [
+        [
+          {
+            "node": "Google Drive2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking \"Execute Workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive2": {
+      "main": [
+        [
+          {
+            "node": "Move Binary Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive1": {
+      "main": [
+        [
+          {
+            "node": "IF1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "97a5e6c7-94c3-4b51-b52b-19d20cd6ea10",
+  "id": "77",
+  "meta": {
+    "instanceId": "7bfea076db05271bda3779ae68f8c25c7bf6ab9038c7c740cee303eb9b445dd4"
+  },
+  "tags": [
+    {
+      "createdAt": "2023-03-03T12:34:50.900Z",
+      "updatedAt": "2023-03-03T12:34:50.900Z",
+      "id": "7",
+      "name": "Mainly Tiny Homes"
+    }
+  ]
+}
