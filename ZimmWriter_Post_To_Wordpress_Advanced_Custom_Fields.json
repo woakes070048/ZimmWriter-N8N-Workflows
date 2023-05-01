@@ -1,0 +1,447 @@
+{
+  "name": "ZimmWriter Post To Wordpress Advanced Custom Fields",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "5cabeea4-a815-492d-aebb-341c3d195c17",
+      "name": "When clicking \"Execute Workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "Your Folder ID",
+          "mode": "id"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "067a0733-1b37-4e20-85f9-c57075439c19",
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        420
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "42",
+          "name": "Woakes070048 Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "list",
+        "useQueryString": true,
+        "queryString": "\"Your Folder ID\" in parents and trashed=false and mimeType!=\"application/vnd.google-apps.folder\"",
+        "options": {}
+      },
+      "id": "95298ba7-d507-4112-b809-4b6712018ef9",
+      "name": "Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        220,
+        420
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "42",
+          "name": "Woakes070048 Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "bdbb2119-fe56-46ad-a2b0-cff7aca959ba",
+      "name": "Google Drive1",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        660,
+        400
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "42",
+          "name": "Woakes070048 Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "setAllData": false,
+        "options": {
+          "jsonParse": false
+        }
+      },
+      "id": "2d193109-c813-4e89-bd5a-69cfc9c7de12",
+      "name": "Move Binary Data",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1,
+      "position": [
+        840,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $node[\"FinalForm-MidJourney Prompt\"].json[\"id\"] }}",
+          "mode": "id"
+        },
+        "updateFields": {
+          "parentId": "Your Folder ID"
+        },
+        "options": {}
+      },
+      "id": "73fd87f9-e1f7-4718-b2de-70c6dc976ca5",
+      "name": "Google Drive2",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        1620,
+        400
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "42",
+          "name": "Woakes070048 Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://yourdomain.com/wp-json/wp/v2/posts",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wordpressApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "name": "status",
+              "value": "draft"
+            },
+            {
+              "name": "acf",
+              "value": "={{ $json.acf }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "95e095b2-9277-47a5-b87c-4e2cfecbf0a1",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1440,
+        400
+      ],
+      "credentials": {
+        "wordpressApi": {
+          "id": "51",
+          "name": "aco Wordpress"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.data }}",
+              "operation": "contains",
+              "value2": "Midjourney AI Image Prompt:"
+            }
+          ]
+        }
+      },
+      "id": "5dd77427-509b-4921-bb17-5465576dbc5c",
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseInput = (input) => {\n  const article = input.trim();\n  const sections = article.split(/(?<=\\n)(?=## )/);\n  const firstSection = sections[0].split('@').slice(5).join(' ').trim();\n  const [meta, emptyReturnSym, title, ...rest] = firstSection.trim().split(\"\\n\");\n  const intro = rest.join(\" \");\n  const obj = {\n    meta: meta.slice(18).trim(),\n    title: title.trim(),\n    h1: title.trim(),\n    intro: intro.trim()\n  };\n  \n  for (let i = 1; i < sections.length; i++) {\n    const section = sections[i];\n    const [header, ...contentLines] = section.trim().split(\"\\n\");\n    const content = contentLines.join(\"\\n\").trim();\n    obj[`h2${i}`] = header.slice(2).trim();\n    obj[`p${i}`] = content.replace(/###/g, '\\n').trim();\n  }\n\n  return obj;\n}\n\n// This needs to be tucked into one more array. for n8n to grok it properly.\nfinalArr = new Array;\nfor (const item of $input.all()) {\n  const {title, meta, ...data} = parseInput(item.json.data);\n  finalArr.push({\n    id: item.json.id,\n    article: item.json.data,\n    file_name: item.json.name,\n    title: title,\n    meta: meta,\n    acf: data\n  })\n}\nreturn finalArr;"
+      },
+      "id": "5220e89f-9569-41ae-b492-55e0399d4c6c",
+      "name": "FinalForm1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseInput = (input) => {\n  const article = input.trim();\n  const sections = article.split(/(?<=\\n)(?=## )/);\n  const firstSection = sections[0].split('@').slice(9).join(' ').trim();\n  const [meta, emptyReturnSym, title, ...rest] = firstSection.trim().split(\"\\n\");\n  const intro = rest.join(\" \");\n  const obj = {\n    meta: meta.slice(18).trim(),\n    title: title.trim(),\n    h1: title.trim(),\n    intro: intro.trim()\n  };\n  \n  for (let i = 1; i < sections.length; i++) {\n    const section = sections[i];\n    const [header, ...contentLines] = section.trim().split(\"\\n\");\n    const content = contentLines.join(\"\\n\").trim();\n    obj[`h2${i}`] = header.slice(2).trim();\n    obj[`p${i}`] = content.replace(/###/g, '\\n').trim();\n  }\n\n  return obj;\n}\n\n// This needs to be tucked into one more array. for n8n to grok it properly.\nfinalArr = new Array;\nfor (const item of $input.all()) {\n  const {title, meta, ...data} = parseInput(item.json.data);\n  finalArr.push({\n    id: item.json.id,\n    article: item.json.data,\n    file_name: item.json.name,\n    title: title,\n    meta: meta,\n    acf: data\n  })\n}\nreturn finalArr;"
+      },
+      "id": "92e37e50-da0a-4c81-be34-5c7136f7bc04",
+      "name": "FinalForm-MidJourney Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": true,
+              "value2": "={{$node[\"SplitInBatches1\"].context[\"noItemsLeft\"]}}"
+            }
+          ]
+        }
+      },
+      "id": "e38f4108-0463-4d0d-86e7-1e46a4fcc0c0",
+      "name": "IF1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        540
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "317777c3-1115-4900-bd38-1cc9ee4981b2",
+      "name": "No Operation, do nothing1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2100,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "df36d427-f989-41c2-a254-55c217c5a4a2",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [
+        420,
+        420
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive1": {
+      "main": [
+        [
+          {
+            "node": "Move Binary Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking \"Execute Workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Google Drive2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move Binary Data": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FinalForm1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "FinalForm-MidJourney Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "FinalForm1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FinalForm-MidJourney Prompt": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive2": {
+      "main": [
+        [
+          {
+            "node": "IF1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          {
+            "node": "Google Drive1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "999a89ef-f9e2-4037-b595-010eb07e6995",
+  "id": "141",
+  "meta": {
+    "instanceId": "7bfea076db05271bda3779ae68f8c25c7bf6ab9038c7c740cee303eb9b445dd4"
+  },
+  "tags": [
+    {
+      "createdAt": "2023-04-01T08:59:11.354Z",
+      "updatedAt": "2023-04-01T08:59:11.354Z",
+      "id": "34",
+      "name": "ReadyToTest"
+    },
+    {
+      "createdAt": "2023-04-01T08:59:30.089Z",
+      "updatedAt": "2023-04-01T08:59:30.089Z",
+      "id": "36",
+      "name": "Ximwriter"
+    },
+    {
+      "createdAt": "2023-04-14T23:06:43.892Z",
+      "updatedAt": "2023-04-14T23:06:43.892Z",
+      "id": "39",
+      "name": "Zimm Course"
+    }
+  ]
+}

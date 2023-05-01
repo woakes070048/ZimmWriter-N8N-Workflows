@@ -1,0 +1,1423 @@
+{
+  "name": "Ultimate Zimmwriter, Google Drive, WordPress Workflow For Export",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.body }}",
+        "destinationKey": "content",
+        "options": {
+          "noHeaderId": true,
+          "tablesHeaderId": true,
+          "tables": true
+        }
+      },
+      "id": "74ef11e9-620f-43f1-9aa7-f7ddbbe3d8c1",
+      "name": "Markdown",
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Get the file contents from the input data\nconst fileContents = $input.item.json.filecontents;\n\n// Split the file contents into an array of lines\nconst lines = fileContents.split('\\n');\n\n// Remove the first 9 lines\nlines.splice(0, 9);\n\n// Join the remaining lines back into a single string\nconst newFileContents = lines.join('\\n');\n\n// Set the new file contents as the output\n// return [{ json: { filecontents: newFileContents } }];\nreturn { json: { filecontents: newFileContents.trim() } };\n"
+      },
+      "id": "231dd2a5-320e-4ab4-9e60-70a9a2b8710c",
+      "name": "Code1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1160,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "setAllData": false,
+        "destinationKey": "filecontents",
+        "options": {
+          "jsonParse": false
+        }
+      },
+      "id": "5def8a5b-f4fe-43d7-af3d-f045c76bffe1",
+      "name": "Move Binary Data",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1,
+      "position": [
+        -1860,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "cbf45217-aa71-4dfd-9ef2-137cf2007b01",
+      "name": "Google Drive2",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        -2040,
+        900
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "42",
+          "name": "Woakes070048 Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $node[\"Google Drive2\"].json[\"id\"] }}",
+          "mode": "id"
+        },
+        "updateFields": {
+          "fileName": "=published-{{ $node[\"Google Drive2\"].json.name }}",
+          "parentId": "Enter Your Published Folder"
+        },
+        "options": {}
+      },
+      "id": "b1559c9b-fe3b-4390-b157-6c403b17335e",
+      "name": "Google Drive1",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        1900,
+        920
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "42",
+          "name": "Woakes070048 Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "list",
+        "useQueryString": true,
+        "queryString": "\"Enter Your Upload Folder\" in parents",
+        "options": {}
+      },
+      "id": "e13c3aa1-bc8c-482d-bc2a-72a34e0ae052",
+      "name": "Google Drive3",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        -2420,
+        920
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "42",
+          "name": "Woakes070048 Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "ff5fc443-8119-48f2-b9a2-84139496a504",
+      "name": "When clicking \"Execute Workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2660,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "prompt": {
+          "messages": [
+            {
+              "content": "=I want you to categorize this blog post \"{{ $json.title }}\" based on those categories. You can only choose 1: \n\nBPM = \"2\"\nChatGPT = \"3508\"\nCloud = \"3\"\nCommunication = \"5\"\nCybersecurity = \"3509\"\nDigital Marketing = \"7\"\nDocument Management = \"8\"\nEcommerce = \"9\"\nEmail = \"10\"\nEmail Marketing = \"3451\"\nERP = \"11\"\nHow To Guides = \"3440\"\nHow To Market = \"12\"\nHRM = \"13\"\nIncreased Efficiency = \"14\"\nIT Consulting = \"15\"\nManaged IT Services = \"16\"\nMarketing = \"3506\"\nNetworking = \"17\"\nOpen Source = \"18\"\nPhone Systems = \"19\"\nSecurity = \"20\"\nSelf-Hosting = \"3441\"\nSocial Media Marketing = \"3488\"\nSoftware Solutions = \"21\"\nSupport = \"22\"\nSysadmin = \"3439\"\nVirtualization = \"23\"\nVOIP = \"24\"\nWeb Services = \"25\"\nWebsites = \"26\"\nData Analytics = \"3514\"\nBranding = \"3515\"\nAffiliate Marketing = \"3516\"\nInfluencer Marketing = \"3517\"\nWordPress = \"3518\"\nMarketing Automation = \"3519\"\nNo Code Automation = \"3520\"\nAutomation = \"3521\"\nContent Marketing = \"3522\"\nOnline Reputation Management = \"3523\"\nSearch Engine Optimization = \"3524\"\nAnalytics and Reporting = \"3525\"\n\nMobile Marketing = \"3526\"\nVideo Marketing = \"3527\"\nPay-Per-Click (PPC) Advertising = \"3528\"\nConversion Rate Optimization = \"3529\"\nPodcast Marketing = \"3530\"\nAccount-Based Marketing = \"3531\"\nEvent Marketing = \"3532\"\nSMS Marketing = \"3533\"\nPublic Relations (PR) = \"3534\"\nNative Advertising = \"3535\"\nGrowth Hacking = \"3536\"\n\nNow the only reponse that i want is the number in the \"\". Do not any thing other the the number. I dont want the categroy only the number. Do not add \"Category:\". I only want the number in the \"\". Do not add quotations to the number. All we want is the number."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fc604c30-30e8-493c-bf30-1e3ca6d077b9",
+      "name": "OpenAI",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        1220
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "27",
+          "name": "OpenAi account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "multiplex",
+        "options": {}
+      },
+      "id": "221ae7c9-e788-4d8d-a4b2-ef74753441eb",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        760,
+        940
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "multiplex",
+        "options": {}
+      },
+      "id": "fcd64ad0-cd80-4c37-b1a4-755e723c1088",
+      "name": "Merge1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://yourdomainname.com/wp-json/wp/v2/posts/{{ $json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wordpressApi",
+        "sendQuery": true,
+        "specifyQuery": "json",
+        "jsonQuery": "={\n\"featured_media\": {{ $json.imageid }}\n}",
+        "options": {}
+      },
+      "id": "c4fad96c-c31e-46de-899b-4fe7de9401a3",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1680,
+        920
+      ],
+      "credentials": {
+        "wordpressApi": {
+          "id": "34",
+          "name": "Pegas.io Wordpress account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "title": "={{ $json.title }}",
+        "additionalFields": {
+          "authorId": 6,
+          "content": "={{ $json.content }}",
+          "status": "draft",
+          "categories": "={{ $json.category }}"
+        }
+      },
+      "id": "7190da1f-c2e1-49ab-bb66-a2265c44d1af",
+      "name": "Wordpress",
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        980,
+        940
+      ],
+      "credentials": {
+        "wordpressApi": {
+          "id": "34",
+          "name": "Pegas.io Wordpress account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "title",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "name": "content",
+              "value": "=<style>   table {     width: 100%;     border-collapse: collapse;   }   table, th, td {     border: 1px solid black;   }   th, td {     padding: 8px;     text-align: left;   }</style> {{ $json.content }} {{ $json.videourl }}  "
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ea519cda-1967-469b-949e-9eedf37f4ad8",
+      "name": "Set3",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        480,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "Your API Key"
+            },
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "type",
+              "value": "video"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.message.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9c604014-8244-4cd6-8de9-fc206da59c2a",
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -180,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "videourl",
+              "value": "=<!-- wp:embed {\"url\":\"https://www.youtube.com/watch?v={{ $json.items[0].id.videoId }}\",\"type\":\"video\",\"providerNameSlug\":\"youtube\",\"responsive\":true,\"className\":\"wp-embed-aspect-16-9 wp-has-aspect-ratio\"} -->\n<figure class=\"wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio\">\n<div class=\"wp-block-embed__wrapper\">https://www.youtube.com/watch?v=8dXVuc1-9Ds</div>\n</figure>\n<!-- /wp:embed -->"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4633a252-b725-4a65-8e6e-4b2041ba58b8",
+      "name": "Set Video URL",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "multiplex",
+        "options": {}
+      },
+      "id": "43dc9034-ea9b-4357-9ee1-aaf9f8810240",
+      "name": "Merge2",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        260,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "category",
+              "value": "={{ $json.message.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "972e62d9-49af-4f34-848b-68dc2ad4a9ed",
+      "name": "Set",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        1220
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "Image1",
+              "value": "={{ $json.Image1 }}"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": true
+        }
+      },
+      "id": "d27f9353-38c7-40e6-9736-003ea9da72f7",
+      "name": "Set1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        420,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://pixabay.com/api/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "=Your API Key"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.message.content }}"
+            },
+            {
+              "name": "image_type",
+              "value": "photo"
+            },
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "856b0f6e-c47f-4191-bffc-1597bb303e86",
+      "name": "Pixabay HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -180,
+        700
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "Image1",
+              "value": "={{ $json.hits[0].largeImageURL }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "004ebdca-9057-4151-8baf-3c4ea69b0706",
+      "name": "Set Pixabay Image URL1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        0,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "prompt": {
+          "messages": [
+            {
+              "content": "=give me a single \"3 to 4-word search phrase for an image\" based on this:{{ $json.title }}.  I dont want any plus, minus, quotations, or parentheses. Do not include Maine. Do not use the product name like \"mautic, ERPNext, etc\", company name like \"yourbrandname\""
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 2500,
+          "n": 1
+        }
+      },
+      "id": "2782481a-e463-4557-bc51-119d6f0f6831",
+      "name": "Find Keyword",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        700
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "48",
+          "name": "OpenAi Richards API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "imageid",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "edb9230a-02fa-47bc-9ad5-acd31ebdbce2",
+      "name": "Set2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        680
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "content": "## Download File \nProvide the url of the file you want to want to upload to wordpress.",
+        "height": 420,
+        "width": 160
+      },
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        380,
+        440
+      ],
+      "id": "10b5ea2c-7de5-4a4a-bdc3-8591bed7107d"
+    },
+    {
+      "parameters": {
+        "content": "## Set Headers \nSet file type in content-type. \n\nYou can provide a custom file name inside content-disposition",
+        "height": 420,
+        "width": 160
+      },
+      "name": "Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        440
+      ],
+      "id": "95c06d29-106e-4062-81bf-e68023888d14"
+    },
+    {
+      "parameters": {
+        "content": "## Upload\nReplace example.com with your wordpress sites sites domain.\n\nUse the same authentication as needed for the wordpress node. ",
+        "height": 420,
+        "width": 180
+      },
+      "name": "Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        740,
+        440
+      ],
+      "id": "a792d2c7-6629-4b41-a015-a644571f6dc3"
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wordpressApi",
+        "requestMethod": "POST",
+        "url": "https://yourdomainname.com/wp-json/wp/v2/media",
+        "jsonParameters": true,
+        "options": {
+          "bodyContentType": "raw"
+        },
+        "sendBinaryData": true,
+        "headerParametersJson": "={{$json}}"
+      },
+      "name": "Upload To Wordpress",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        980,
+        680
+      ],
+      "id": "a4f216ef-6b8e-4274-814c-5480a3f98f34",
+      "credentials": {
+        "wordpressApi": {
+          "id": "34",
+          "name": "Pegas.io Wordpress account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "content-type",
+              "value": "image/jpg"
+            },
+            {
+              "name": "content-disposition",
+              "value": "=attachment; filename={{$binary.data.fileName}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Headers",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        800,
+        680
+      ],
+      "id": "057c6d61-4285-434e-9b97-f2e8a504d84a",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.Image1 }}",
+        "responseFormat": "file",
+        "options": {}
+      },
+      "name": "Download File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        600,
+        680
+      ],
+      "id": "a6727c67-e740-42e5-9e05-be12a2219354",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "b9476fcc-3736-4c5e-9e35-d7299a4ac250",
+      "name": "Merge3",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        240,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.pexels.com/v1/search?orientation=landscape",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.message.content }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Your API Key"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6521f723-65d7-490c-b570-e00209a43cb6",
+      "name": "Pexels HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -180,
+        540
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "Image1",
+              "value": "={{ $json.photos[0].src.original }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "65b8b755-132c-4a38-85b5-83e3c0d9c854",
+      "name": "Set Pexels Image URL",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        0,
+        540
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.filecontents }}",
+        "rules": {
+          "rules": [
+            {
+              "operation": "contains",
+              "value2": "Settings used:"
+            },
+            {
+              "operation": "notContains",
+              "value2": "Settings Used:",
+              "output": 1
+            }
+          ]
+        }
+      },
+      "id": "c683ef0b-22aa-4e65-bf22-690477adcda3",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Get the file contents from the input data\nconst fileContents = $input.item.json.filecontents;\n\n// Split the file contents into an array of lines\nconst lines = fileContents.split('\\n');\n\n// Remove the first 7 lines\nlines.splice(0, 7);\n\n// Join the remaining lines back into a single string\nconst newFileContents = lines.join('\\n');\n\n// Set the new file contents as the output\n// return [{ json: { filecontents: newFileContents } }];\nreturn { json: { filecontents: newFileContents.trim() } };\n"
+      },
+      "id": "ad4cc3ff-1472-4ddc-b2d0-a0e4900966da",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1160,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.filecontents }}",
+              "operation": "contains",
+              "value2": "Midjourney AI Image Prompt:"
+            }
+          ]
+        }
+      },
+      "id": "45828779-81cc-4441-8323-70e4b0e417ce",
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1420,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.filecontents }}",
+              "operation": "contains",
+              "value2": "Midjourney AI Image Prompt:"
+            }
+          ]
+        }
+      },
+      "id": "bfdfd637-ac32-42ed-aff4-dc388c355995",
+      "name": "IF2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1420,
+        980
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Get the file contents from the input data\nconst fileContents = $input.item.json.filecontents;\n\n// Split the file contents into an array of lines\nconst lines = fileContents.split('\\n');\n\n// Remove the first 2 lines\nlines.splice(0, 2);\n\n// Join the remaining lines back into a single string\nconst newFileContents = lines.join('\\n');\n\n// Set the new file contents as the output\n// return [{ json: { filecontents: newFileContents } }];\nreturn { json: { filecontents: newFileContents.trim() } };\n"
+      },
+      "id": "30e7e9f6-b51c-4281-8ccc-86cc80b8210f",
+      "name": "Code3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1160,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Get the file contents from the input data\nconst fileContents = $input.item.json.filecontents;\n\n// Split the file contents into an array of lines\nconst lines = fileContents.split('\\n');\n\n// Remove the first 4 lines\nlines.splice(0, 4);\n\n// Join the remaining lines back into a single string\nconst newFileContents = lines.join('\\n');\n\n// Set the new file contents as the output\n// return [{ json: { filecontents: newFileContents } }];\nreturn { json: { filecontents: newFileContents.trim() } };\n"
+      },
+      "id": "74720bc5-da4f-413f-b57a-653cd4f948c5",
+      "name": "Code4",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1160,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "00a6c71c-7e97-4139-a8b8-ef640c5071c4",
+      "name": "Split In Batches1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [
+        -2220,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the file content from the previous node\nconst fileContent = items[0].json.filecontents;\n\n// Split the file content into an array of lines\nconst lines = fileContent.split('\\n');\n\n// Get the first line as the title\nconst title = lines[0].trim();\n\n// Get the rest of the lines as the body and join them together\nconst body = lines.slice(1).join('\\n').trim();\n\n// Set the output\nreturn [{json: {title, body}}];\n"
+      },
+      "id": "94075012-74b7-433b-b04d-85892f709a09",
+      "name": "Code5",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": true,
+              "value2": "={{$node[\"SplitInBatches1\"].context[\"noItemsLeft\"]}}"
+            }
+          ]
+        }
+      },
+      "id": "06d7c713-e57d-479e-a9aa-263d95b1211d",
+      "name": "IF1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        1240
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "73d1d95d-496e-46dd-95a7-1704e51e1174",
+      "name": "No Operation, do nothing1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2500,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "prompt": {
+          "messages": [
+            {
+              "content": "=give me a 3 to 6 word search phrase for a youtube video based on this:{{ $json.title }}.  I dont want any plus, minus, quotations, or parentheses. Do not include Maine. Do not use the company name like \"your brand name\""
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 2500,
+          "n": 1
+        }
+      },
+      "id": "2d4c59c9-2bbb-45c3-ab5f-928e89860f93",
+      "name": "Find Keyword1",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        1020
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "48",
+          "name": "OpenAi Richards API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFile",
+        "fileToWatch": {
+          "__rl": true,
+          "value": "Enter Your Upload Folder",
+          "mode": "id"
+        }
+      },
+      "id": "1e042ba9-d0e5-44f5-93a3-84022d0aba7e",
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2620,
+        920
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find Keyword",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find Keyword1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Code5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move Binary Data": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive2": {
+      "main": [
+        [
+          {
+            "node": "Move Binary Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive3": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking \"Execute Workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Google Drive3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Wordpress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Google Drive1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wordpress": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Set3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Set Video URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Video URL": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Set3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Set1": {
+      "main": [
+        [
+          {
+            "node": "Download File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pixabay HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Set Pixabay Image URL1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Pixabay Image URL1": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Find Keyword": {
+      "main": [
+        [
+          {
+            "node": "Pixabay HTTP Request1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pexels HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload To Wordpress": {
+      "main": [
+        [
+          {
+            "node": "Set2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Headers": {
+      "main": [
+        [
+          {
+            "node": "Upload To Wordpress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File": {
+      "main": [
+        [
+          {
+            "node": "Set Headers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "Set1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pexels HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Set Pexels Image URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Pexels Image URL": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Code5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF2": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code4": {
+      "main": [
+        [
+          {
+            "node": "Code5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Code5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches1": {
+      "main": [
+        [
+          {
+            "node": "Google Drive2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code5": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split In Batches1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive1": {
+      "main": [
+        [
+          {
+            "node": "IF1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Keyword1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Drive3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "d129db2f-99f0-488f-b97f-3ccbd79492cb",
+  "id": "219",
+  "meta": {
+    "instanceId": "7bfea076db05271bda3779ae68f8c25c7bf6ab9038c7c740cee303eb9b445dd4"
+  },
+  "tags": [
+    {
+      "createdAt": "2023-03-22T20:48:19.209Z",
+      "updatedAt": "2023-03-22T20:48:19.209Z",
+      "id": "22",
+      "name": "ZimmWriter"
+    },
+    {
+      "createdAt": "2023-04-01T08:59:11.354Z",
+      "updatedAt": "2023-04-01T08:59:11.354Z",
+      "id": "34",
+      "name": "ReadyToTest"
+    },
+    {
+      "name": "Couse",
+      "createdAt": "2023-05-01T04:38:07.102Z",
+      "updatedAt": "2023-05-01T04:38:07.102Z",
+      "id": "42"
+    }
+  ]
+}
